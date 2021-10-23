@@ -1,2 +1,2 @@
 # bitcoin-wallet-api
-API to manage bitcoin wallet
+API backend to manage bitcoin wallet.
