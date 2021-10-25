@@ -14,6 +14,7 @@ import { LocalStrategy } from './local.strategy'
     PassportModule,
     JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '3d' } })
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy]
+  providers: [AuthService, LocalStrategy, JwtStrategy],
+  exports: [AuthService]
 })
 export class AuthModule {}
