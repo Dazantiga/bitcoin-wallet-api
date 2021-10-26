@@ -14,9 +14,8 @@ export class TickersService {
     if (ticker) {
       return { BTCPrice: ticker.avgPrice.toFixed(2), quantityOfBTC: (value / ticker.avgPrice).toFixed(7) }
     } else {
-      console.log('OLAAAA')
       const arrDate: Array<string> = date.split('/')
-      const resultBuffer = await axios(`https://www.mercadobitcoin.net/api/BTC/day-summary/${arrDate.at(2)}/${arrDate.at(1)}/${arrDate.at(0)}/`)
+      const resultBuffer = await axios(`https://www.mercadobitcoin.net/api/BTC/day-summary/${arrDate[2]}/${arrDate[1]}/${arrDate[0]}/`)
       const avgPrice = resultBuffer['data']['avg_price']
       await this.tickerRepository.create({ date, avgPrice })
       return { BTCPrice: avgPrice.toFixed(2), quantityOfBTC: (value / avgPrice).toFixed(7) }
