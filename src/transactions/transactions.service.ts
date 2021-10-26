@@ -19,7 +19,11 @@ export class TransactionsService {
   }
 
   findAll (userId: string) {
-    return this.transactionRepository.find({ userId }).exec()
+    const idValid = mongoose.Types.ObjectId.isValid(userId)
+    if (idValid) {
+      return this.transactionRepository.find({ userId }).exec()
+    }
+    throw new HttpException('id provided is invalid', HttpStatus.BAD_REQUEST)
   }
 
   async findOne (id: string) {
