@@ -1,33 +1,29 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
 import { CreateUserDto } from './dto/create-user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { User } from './entities/user.entity'
+import { hashSync } from 'bcryptjs'
+import { AuthService } from 'src/auth/auth.service'
 
 @Injectable()
 export class UsersService {
-  create (createUserDto: CreateUserDto) {
-    return 'This action adds a new user'
-  }
+  constructor (
+    @InjectModel('User') private readonly userRepository: Model<User>,
+    @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService
+  ) {}
 
-  findAll () {
-    return 'This action returns all users'
-  }
-
-  findOne (id: number) {
-    return `This action returns a #${id} user`
-  }
-
-  findByEmail (email: string) {
-    return {
-      name: 'User',
-      password: '1234'
+  async create (createUserDto: CreateUserDto) {
+    const userExists = await this.userRepository.findOne({ email: createUserDto.email })
+    if (!userExists) {
+      createUserDto.password = hashSync(createUserDto.password)
+      const userSaved = await this.userRepository.create(createUserDto)
+      return await this.authService.auth(userSaved)
     }
+    throw new HttpException('user with email already exists', HttpStatus.BAD_REQUEST)
   }
 
-  update (id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`
-  }
-
-  remove (id: number) {
-    return `This action removes a #${id} user`
+  async findByEmail (email: string) {
+    return await this.userRepository.findOne({ email }) || null
   }
 }

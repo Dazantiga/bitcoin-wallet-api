@@ -12,6 +12,5 @@ export class CreateTransactionDto {
   @IsString()
   date: string
 
-  @IsString()
   userId: string
 }

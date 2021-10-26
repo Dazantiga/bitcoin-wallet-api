@@ -17,7 +17,5 @@ export class UpdateTransactionDto {
   @IsString()
   date: string
 
-  @IsOptional()
-  @IsString()
   userId: string
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { forwardRef, Inject, Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { compareSync } from 'bcryptjs'
 import { UsersService } from 'src/users/users.service'
@@ -6,7 +6,7 @@ import { UsersService } from 'src/users/users.service'
 @Injectable()
 export class AuthService {
   constructor (
-    private readonly userService: UsersService,
+    @Inject(forwardRef(() => UsersService)) private readonly userService: UsersService,
     private readonly jwtService: JwtService
   ) {}
 
@@ -17,7 +17,7 @@ export class AuthService {
   async validateUser (email: string, password: string) {
     const user = await this.userService.findByEmail(email)
     if (user) {
-      const passwordIsValid = await this.validatePassword(user.password, password)
+      const passwordIsValid = await this.validatePassword(password, user.password)
       if (passwordIsValid) {
         return user
       }

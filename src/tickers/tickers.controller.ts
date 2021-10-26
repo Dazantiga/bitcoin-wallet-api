@@ -1,6 +1,8 @@
-import { Controller, Get, Query } from '@nestjs/common'
+import { Controller, Get, Query, UseGuards } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
 import { TickersService } from './tickers.service'
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('tickers')
 export class TickersController {
   constructor (private readonly tickersService: TickersService) {}

@@ -18,8 +18,8 @@ export class TransactionsService {
     throw new HttpException('user id provided is invalid', HttpStatus.BAD_REQUEST)
   }
 
-  findAll () {
-    return this.transactionRepository.find().exec()
+  findAll (userId: string) {
+    return this.transactionRepository.find({ userId }).exec()
   }
 
   async findOne (id: string) {
