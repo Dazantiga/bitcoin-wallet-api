@@ -5,7 +5,63 @@
 
 version: 2
 updates:
-  - package-ecosystem: "npm" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Configuração para dependências npm de produção
+  - package-ecosystem: "npm"
+    directory: "/"
     schedule:
       interval: "daily"
+      time: "08:00"
+      timezone: "America/Sao_Paulo"
+    # Limitar número de PRs abertos para evitar sobrecarga
+    open-pull-requests-limit: 10
+    # Configurações de automerge
+    auto-merge: true
+    auto-merge-conditions:
+      - "status-success=build"
+      - "status-success=test"
+    # Priorizar atualizações de segurança
+    security-updates-only: false
+    # Configurar labels automáticos
+    labels:
+      - "dependencies"
+      - "npm"
+      - "security"
+    # Ignorar certas dependências (opcional)
+    ignore:
+      # Exemplo de como ignorar atualizações de patch para pacotes específicos
+      - dependency-name: "@types/*"
+        update-types: ["version-update:semver-patch"]
+    # Configurar estratégia de versão
+    versioning-strategy: auto
+    # Agrupar todas as dependências do NestJS
+    groups:
+      nestjs:
+        patterns:
+          - "@nestjs/*"
+        update-types:
+          - "minor"
+          - "patch"
+      dev-deps:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    commit-message:
+      prefix: "fix"
+      prefix-development: "chore"
+      include: "scope"
+    # Configurar revisor
+    reviewers:
+      - "jcjesus"
+    assignees:
+      - "jcjesus"
+    # Permitir apenas um PR por dependência
+    rebase-strategy: "auto"
+    # Configurações de target branch
+    target-branch: "main"
+    # Configurações de vulnerabilidade
+    vulnerability-alerts:
+      enabled: true
+    # Configurações de aprovação automática
+    auto-approve:
+      - "dependabot[bot]"
