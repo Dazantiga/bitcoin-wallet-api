@@ -14,6 +14,10 @@ export class TickersService {
     if (ticker) {
       return { BTCPrice: ticker.avgPrice.toFixed(2), quantityOfBTC: (value / ticker.avgPrice).toFixed(7) }
     } else {
+      const datePattern = /^\d{2}\/\d{2}\/\d{4}$/;
+      if (!datePattern.test(date)) {
+        throw new Error('Invalid date format. Expected format: DD/MM/YYYY');
+      }
       const arrDate: Array<string> = date.split('/')
       const resultBuffer = await axios(`https://www.mercadobitcoin.net/api/BTC/day-summary/${arrDate[2]}/${arrDate[1]}/${arrDate[0]}/`)
       const avgPrice = resultBuffer['data']['avg_price']
