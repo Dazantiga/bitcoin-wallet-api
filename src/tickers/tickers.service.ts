@@ -24,7 +24,7 @@ export class TickersService {
   ) {}
 
   async getPrice(date: string, value: number) {
-    const ticker = await this.tickerRepository.findOne({ date })
+    const ticker = await this.tickerRepository.findOne({ date: { $eq: date } })
     if (ticker) {
       return { BTCPrice: ticker.avgPrice.toFixed(2), quantityOfBTC: (value / ticker.avgPrice).toFixed(7) }
     } else {
