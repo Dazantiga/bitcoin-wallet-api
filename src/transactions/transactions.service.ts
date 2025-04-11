@@ -10,10 +10,12 @@ export class TransactionsService {
   constructor (@InjectModel('Transaction') private readonly transactionRepository: mongoose.Model<Transaction>) {}
 
   private sanitizeUpdateDto(updateTransactionDto: UpdateTransactionDto): UpdateTransactionDto {
-    // Add validation and sanitization logic here
-    // For example, ensure all fields are of expected types and do not contain malicious content
-    // This is a placeholder implementation
     const sanitizedDto: UpdateTransactionDto = { ...updateTransactionDto }
+    // Example validation and sanitization logic
+    if (typeof sanitizedDto.userId !== 'string' || !mongoose.Types.ObjectId.isValid(sanitizedDto.userId)) {
+      throw new HttpException('Invalid userId', HttpStatus.BAD_REQUEST)
+    }
+    // Add more validation and sanitization as needed for other fields
     return sanitizedDto
   }
 
@@ -52,7 +54,7 @@ export class TransactionsService {
       const transaction = await this.transactionRepository.findById(id)
       if (transaction) {
         const sanitizedUpdate = this.sanitizeUpdateDto(updateTransactionDto)
-        await this.transactionRepository.findByIdAndUpdate(id, { $set: sanitizedUpdate })
+        await this.transactionRepository.findByIdAndUpdate(id, { $set: { ...sanitizedUpdate, userId: { $eq: sanitizedUpdate.userId } } })
         return
       }
       throw new HttpException('transaction not found', HttpStatus.NOT_FOUND)
