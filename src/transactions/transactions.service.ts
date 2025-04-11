@@ -9,6 +9,14 @@ import { Transaction } from './entities/transaction.entity'
 export class TransactionsService {
   constructor (@InjectModel('Transaction') private readonly transactionRepository: mongoose.Model<Transaction>) {}
 
+  private sanitizeUpdateDto(updateTransactionDto: UpdateTransactionDto): UpdateTransactionDto {
+    // Add validation and sanitization logic here
+    // For example, ensure all fields are of expected types and do not contain malicious content
+    // This is a placeholder implementation
+    const sanitizedDto: UpdateTransactionDto = { ...updateTransactionDto }
+    return sanitizedDto
+  }
+
   async create (createTransactionDto: CreateTransactionDto): Promise<void> {
     const userIdValid = mongoose.Types.ObjectId.isValid(createTransactionDto.userId)
     if (userIdValid) {
@@ -43,7 +51,8 @@ export class TransactionsService {
     if (idValid) {
       const transaction = await this.transactionRepository.findById(id)
       if (transaction) {
-        await this.transactionRepository.findByIdAndUpdate(id, { $set: updateTransactionDto })
+        const sanitizedUpdate = this.sanitizeUpdateDto(updateTransactionDto)
+        await this.transactionRepository.findByIdAndUpdate(id, { $set: sanitizedUpdate })
         return
       }
       throw new HttpException('transaction not found', HttpStatus.NOT_FOUND)
