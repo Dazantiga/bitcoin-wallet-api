@@ -14,7 +14,10 @@ export class UsersService {
   ) {}
 
   async create (createUserDto: CreateUserDto) {
-    const userExists = await this.userRepository.findOne({ email: createUserDto.email })
+    if (typeof createUserDto.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(createUserDto.email)) {
+      throw new HttpException('Invalid email format', HttpStatus.BAD_REQUEST)
+    }
+    const userExists = await this.userRepository.findOne({ email: { $eq: createUserDto.email } })
     if (!userExists) {
       createUserDto.password = hashSync(createUserDto.password)
       const userSaved = await this.userRepository.create(createUserDto)
