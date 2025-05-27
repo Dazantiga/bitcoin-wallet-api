@@ -10,11 +10,22 @@ export class TransactionsService {
   constructor (@InjectModel('Transaction') private readonly transactionRepository: mongoose.Model<Transaction>) {}
 
   private sanitizeUpdateDto(updateTransactionDto: UpdateTransactionDto): UpdateTransactionDto {
-    const sanitizedDto: UpdateTransactionDto = { ...updateTransactionDto }
-    // Example validation and sanitization logic
-    if (typeof sanitizedDto.userId !== 'string' || !mongoose.Types.ObjectId.isValid(sanitizedDto.userId)) {
+    const sanitizedDto: UpdateTransactionDto = {}
+    
+    // Validate and sanitize userId
+    if (typeof updateTransactionDto.userId === 'string' && mongoose.Types.ObjectId.isValid(updateTransactionDto.userId)) {
+      sanitizedDto.userId = updateTransactionDto.userId
+    } else {
       throw new HttpException('Invalid userId', HttpStatus.BAD_REQUEST)
     }
+    
+    // Validate and sanitize other fields (example: amount)
+    if (typeof updateTransactionDto.amount === 'number' && updateTransactionDto.amount > 0) {
+      sanitizedDto.amount = updateTransactionDto.amount
+    } else if (updateTransactionDto.amount !== undefined) {
+      throw new HttpException('Invalid amount', HttpStatus.BAD_REQUEST)
+    }
+    
     // Add more validation and sanitization as needed for other fields
     return sanitizedDto
   }
@@ -54,7 +65,12 @@ export class TransactionsService {
       const transaction = await this.transactionRepository.findById(id)
       if (transaction) {
         const sanitizedUpdate = this.sanitizeUpdateDto(updateTransactionDto)
-        await this.transactionRepository.findByIdAndUpdate(id, { $set: { ...sanitizedUpdate, userId: { $eq: sanitizedUpdate.userId } } })
+        await this.transactionRepository.findByIdAndUpdate(id, { 
+          $set: { 
+            userId: { $eq: sanitizedUpdate.userId },
+            ...(sanitizedUpdate.amount !== undefined && { amount: sanitizedUpdate.amount })
+          } 
+        })
         return
       }
       throw new HttpException('transaction not found', HttpStatus.NOT_FOUND)
