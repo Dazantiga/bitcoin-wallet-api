@@ -9,8 +9,8 @@ import { Transaction } from './entities/transaction.entity'
 export class TransactionsService {
   constructor (@InjectModel('Transaction') private readonly transactionRepository: mongoose.Model<Transaction>) {}
 
-  private sanitizeUpdateDto(updateTransactionDto: UpdateTransactionDto): UpdateTransactionDto {
-    const sanitizedDto: UpdateTransactionDto = {}
+  private sanitizeUpdateDto(updateTransactionDto: UpdateTransactionDto): Partial<UpdateTransactionDto> {
+    const sanitizedDto: Partial<UpdateTransactionDto> = {}
     
     // Validate and sanitize userId
     if (typeof updateTransactionDto.userId === 'string' && mongoose.Types.ObjectId.isValid(updateTransactionDto.userId)) {
@@ -19,14 +19,34 @@ export class TransactionsService {
       throw new HttpException('Invalid userId', HttpStatus.BAD_REQUEST)
     }
     
-    // Validate and sanitize other fields (example: amount)
-    if (typeof updateTransactionDto.amount === 'number' && updateTransactionDto.amount > 0) {
-      sanitizedDto.amount = updateTransactionDto.amount
-    } else if (updateTransactionDto.amount !== undefined) {
-      throw new HttpException('Invalid amount', HttpStatus.BAD_REQUEST)
+    // Validate and sanitize valueInvested
+    if (typeof updateTransactionDto.valueInvested === 'number' && updateTransactionDto.valueInvested > 0) {
+      sanitizedDto.valueInvested = updateTransactionDto.valueInvested
+    } else if (updateTransactionDto.valueInvested !== undefined) {
+      throw new HttpException('Invalid valueInvested', HttpStatus.BAD_REQUEST)
+    }
+
+    // Validate and sanitize btcbToBrl
+    if (typeof updateTransactionDto.btcbToBrl === 'number' && updateTransactionDto.btcbToBrl > 0) {
+      sanitizedDto.btcbToBrl = updateTransactionDto.btcbToBrl
+    } else if (updateTransactionDto.btcbToBrl !== undefined) {
+      throw new HttpException('Invalid btcbToBrl', HttpStatus.BAD_REQUEST)
+    }
+
+    // Validate and sanitize bitcoinQuantity
+    if (typeof updateTransactionDto.bitcoinQuantity === 'number' && updateTransactionDto.bitcoinQuantity > 0) {
+      sanitizedDto.bitcoinQuantity = updateTransactionDto.bitcoinQuantity
+    } else if (updateTransactionDto.bitcoinQuantity !== undefined) {
+      throw new HttpException('Invalid bitcoinQuantity', HttpStatus.BAD_REQUEST)
+    }
+
+    // Validate and sanitize date
+    if (typeof updateTransactionDto.date === 'string' && updateTransactionDto.date.trim().length > 0) {
+      sanitizedDto.date = updateTransactionDto.date
+    } else if (updateTransactionDto.date !== undefined) {
+      throw new HttpException('Invalid date', HttpStatus.BAD_REQUEST)
     }
     
-    // Add more validation and sanitization as needed for other fields
     return sanitizedDto
   }
 
@@ -68,7 +88,10 @@ export class TransactionsService {
         await this.transactionRepository.findByIdAndUpdate(id, { 
           $set: { 
             userId: { $eq: sanitizedUpdate.userId },
-            ...(sanitizedUpdate.amount !== undefined && { amount: sanitizedUpdate.amount })
+            ...(sanitizedUpdate.valueInvested !== undefined && { valueInvested: sanitizedUpdate.valueInvested }),
+            ...(sanitizedUpdate.btcbToBrl !== undefined && { btcbToBrl: sanitizedUpdate.btcbToBrl }),
+            ...(sanitizedUpdate.bitcoinQuantity !== undefined && { bitcoinQuantity: sanitizedUpdate.bitcoinQuantity }),
+            ...(sanitizedUpdate.date !== undefined && { date: sanitizedUpdate.date })
           } 
         })
         return

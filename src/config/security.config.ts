@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import helmet from 'helmet';
-import * as rateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
 import * as hpp from 'hpp';
 
 export function configureSecurityMiddleware(app: INestApplication) {
